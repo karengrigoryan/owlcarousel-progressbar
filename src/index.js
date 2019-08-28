@@ -1,54 +1,164 @@
-// progress bar CSS styles
-import './index.css';
-
 /**
  * Custom progress bar for Owl Carousel
  * @author K. Grigoryan
+ *
+ * @todo: Add custom selectors support
+ * @todo: Add jQuery function like solution
+ * @todo: Add 'loop' prop warning
  */
-function carouselProgressBar() {
-  const carouselWithProgressBar = $('[data-owl-progressbar]');
-  const progressBarElClassName = 'owl-carousel-progressbar';
+class carouselProgressBar {
+  /**
+   * @param {HTMLElement} carouselEl - carousel DOM element
+   */
+  constructor(carousel) {
+    // vars
+    this.carousel = carousel;
+    this.progressBarElClassName = 'owl-carousel-progressbar';
 
-  if (!carouselWithProgressBar.length) return;
+    // progress bar elements
+    this.progressBarEl;
+    this.progressBarElScroller;
 
-  // Create progress bars for one or multiple carousels
-  $.each(carouselWithProgressBar, function() {
-    const carouselEl = $(this);
+    // checkers
+    this.isValidElement;
+    this.isjQueryLoaded;
 
-    // Create progress bar and scroller DOM elements.
-    const progressBarEl = document.createElement('div');
-    const progressBarElScroller = document.createElement('span');
+    // initialize progress bars instances
+    this.initialize();
+  }
 
-    progressBarEl.className = progressBarElClassName;
-    progressBarEl.appendChild(progressBarElScroller);
+  /**
+   * Check if provided carousel element is valid DOM element (node).
+   */
+  checkCarouselElIsValidNode() {
+    const isValidElement =
+      this.carousel instanceof Element || this.carousel instanceof HTMLDocument;
 
-    carouselEl.after(progressBarEl);
+    if (!isValidElement) {
+      console.error(
+        'Provided carousel is not a valid DOM element. Please provide valid DOM element (not an jQuery instance).'
+      );
+    }
 
-    // 2. Listen for carousel initialization, change and resize events and apply progress bar calculations.
-    $(carouselEl).on('initialized.owl.carousel', owlData =>
-      handleProgressBarChange(progressBarElScroller, owlData)
+    this.isValidElement = isValidElement;
+  }
+
+  /**
+   * Check if jQuery is available.
+   */
+  checkjQuery() {
+    const isjQueryLoaded = window.jQuery;
+
+    if (!isjQueryLoaded) {
+      console.error(
+        'jQuery is not loaded. Please attach jQuery or call OwlCarousel ProgressBar script after it.'
+      );
+    }
+
+    this.isjQueryLoaded = window.jQuery;
+  }
+
+  /**
+   * Create progress bar and scroller DOM elements.
+   */
+  createAndAppendProgressBarEl() {
+    this.progressBarEl = document.createElement('div');
+    this.progressBarElScroller = document.createElement('span');
+
+    this.progressBarEl.className = this.progressBarElClassName;
+    this.progressBarEl.appendChild(this.progressBarElScroller);
+
+    this.styleProgressBarsElements();
+
+    this.carousel.parentNode.insertBefore(
+      this.progressBarEl,
+      this.carousel.nextSibling
     );
-    $(carouselEl).on('resized.owl.carousel', owlData =>
-      handleProgressBarChange(progressBarElScroller, owlData)
+  }
+
+  /**
+   * Add nescessary CSS to progress bar and scroller DOM elements.
+   */
+  styleProgressBarsElements() {
+    // progress bar element
+    this.progressBarEl.style.position = 'relative';
+    this.progressBarEl.style.height = '2px';
+    this.progressBarEl.style.backgroundColor = '#f0f0f0';
+    this.progressBarEl.style.borderRadius = '5px';
+    this.progressBarEl.style.marginTop = '10px';
+    this.progressBarEl.style.marginBottom = '10px';
+
+    // scroller element
+    this.progressBarElScroller.style.position = 'absolute';
+    this.progressBarElScroller.style.top = 0;
+    this.progressBarElScroller.style.right = 0;
+    this.progressBarElScroller.style.left = 0;
+    this.progressBarElScroller.style.height = '2px';
+    this.progressBarElScroller.style.maxWidth = '100%';
+    this.progressBarElScroller.style.borderRadius = '5px';
+    this.progressBarElScroller.style.backgroundColor = '#313131';
+    this.progressBarElScroller.style.transition =
+      'margin-left 0.25s ease-in-out';
+  }
+
+  /**
+   * Listen for carousel initialization, change and resize events and apply progress bar calculations.
+   */
+  reactToCarouselChanges() {
+    const carouseljQueryInstance = $(this.carousel);
+
+    carouseljQueryInstance.on(
+      'initialized.owl.carousel resized.owl.carousel translate.owl.carousel',
+      owlData => this.handleProgressBarChange(owlData)
     );
-    $(carouselEl).on('translate.owl.carousel', owlData =>
-      handleProgressBarChange(progressBarElScroller, owlData)
-    );
-  });
+  }
+
+  /**
+   * Create progress bar and add carousel event listeners.
+   */
+  createProgressBarAndListenForChanges() {
+    if (!this.isValidElement || !this.isjQueryLoaded) return;
+
+    this.createAndAppendProgressBarEl();
+    this.reactToCarouselChanges();
+  }
+
+  /**
+   * Simulate carousel's progress by styling scroller element width and left margin.
+   *
+   * @param {Object} carouselData - carousel's current state information
+   */
+  handleProgressBarChange(carouselData) {
+    this.progressBarElScroller.style.width = `${(100 /
+      carouselData.item.count) *
+      carouselData.page.size}%`;
+
+    this.progressBarElScroller.style.marginLeft = `${(carouselData.item.index /
+      carouselData.item.count) *
+      100}%`;
+  }
+
+  /**
+   * Initialize all processes.
+   */
+  initialize() {
+    this.checkCarouselElIsValidNode();
+    this.checkjQuery();
+    this.createProgressBarAndListenForChanges();
+  }
 }
 
 /**
- * Simulate carousel's progress by styling scroller element width and left margin
- *
- * @param {HTMLElement} progressBarElScroller - scroller DOM element
- * @param {Object} carouselData - carousel's current state information
+ * Create progress bars for one or multiple carousels
  */
-function handleProgressBarChange(progressBarElScroller, carouselData) {
-  progressBarElScroller.style.width = `${(100 / carouselData.item.count) *
-    carouselData.page.size}%`;
-  progressBarElScroller.style.marginLeft = `${(carouselData.item.index /
-    carouselData.item.count) *
-    100}%`;
-}
+(function() {
+  const carouselWithProgressBar = document.querySelectorAll(
+    '[data-owl-progressbar]'
+  );
 
-carouselProgressBar();
+  if (!carouselWithProgressBar.length) return;
+
+  carouselWithProgressBar.forEach(
+    carousel => new carouselProgressBar(carousel)
+  );
+})();
