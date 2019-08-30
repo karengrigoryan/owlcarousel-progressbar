@@ -121,7 +121,7 @@
 
     <!-- CREATE OWL CAROUSEL PROGRESS BARS FOR '.owl-carousel' SELECTOR BEFORE OWL CAROUSEL INSTANCE CREATION  -->
     <script>
-      $('.owl-carousel-grey').owlCarouselProgressBar();
+      $('.owl-carousel').owlCarouselProgressBar();
 
       $('.owl-carousel-green').owlCarouselProgressBar({
         size: '10px',
@@ -129,7 +129,9 @@
         foregroundColor: 'darkseagreen',
         color: 'green',
         borderRadius: 0,
-        transitionInterval: 1
+        transitionInterval: 1,
+        progressBarClassName: 'my-custom-class-name',
+        scrollerClassName: 'my-custom-scroller-class-name'
       });
     </script>
 

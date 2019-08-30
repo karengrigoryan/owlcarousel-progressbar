@@ -3,8 +3,6 @@
  * @author K. Grigoryan
  *
  * @todo: Publish to NPM
- * @todo: Fix multiple progress bars issue
- * @todo: Add destroy method
  */
 class carouselProgressBar {
   /**
@@ -35,17 +33,33 @@ class carouselProgressBar {
       options['transitionInterval'] || '0.25';
     this.progressBarMargins = options['margin'] || '10px 0';
 
-    // initialize progress bars instances
+    // css classes for additional user's styling
+    this.progressBarClassName =
+      options['progressBarClassName'] || 'owl-carousel-progress-bar';
+    this.scrollerClassName =
+      options['scrollerClassName'] || 'owl-carousel-progress-bar-scroller';
+
+    // bindings
+    this.destroy = this.destroy.bind(this);
+    this.handleProgressBarChange = this.handleProgressBarChange.bind(this);
+    this.checkForLoopMode = this.checkForLoopMode.bind(this);
+
+    // initialize progress bars instances and attach destroy method
     this.initialize();
   }
 
   /**
    * Create progress bar and scroller DOM elements.
+   * @private
    */
   createAndAppendProgressBarEl() {
     this.progressBarEl = document.createElement('div');
     this.progressBarElScroller = document.createElement('span');
     this.progressBarEl.appendChild(this.progressBarElScroller);
+
+    this.progressBarEl.className = this.progressBarClassName;
+    this.progressBarElScroller.className = this.scrollerClassName;
+
     this.styleProgressBarElements();
 
     this.carousel.parentNode.insertBefore(
@@ -56,6 +70,7 @@ class carouselProgressBar {
 
   /**
    * Add nescessary CSS to progress bar and scroller DOM elements.
+   * @private
    */
   styleProgressBarElements() {
     // progress bar element
@@ -82,19 +97,21 @@ class carouselProgressBar {
   /**
    * Listen for carousel initialization, change and resize events and apply progress bar calculations.
    * Additionaly throw a warning if "loop" option has been activated on carousel instance.
+   * @private
    */
   reactToCarouselChanges() {
     this.$carousel.on(
       'initialized.owl.carousel resized.owl.carousel translate.owl.carousel',
-      owlData => this.handleProgressBarChange(owlData)
+      this.handleProgressBarChange
     );
 
-    this.$carousel.on('translate.owl.carousel', () => this.checkForLoopMode());
+    this.$carousel.on('translate.owl.carousel', this.checkForLoopMode);
   }
 
   /**
    * Check for "loop" option in Owl Carousel instance
    * This plugin currently not supporting that option.
+   * @private
    */
   checkForLoopMode() {
     if (this.$carouselLoopDisabled) return;
@@ -114,6 +131,7 @@ class carouselProgressBar {
    * Simulate carousel's progress by styling scroller element width and left margin.
    *
    * @param {Object} carouselData - carousel's current state information
+   * @private
    */
   handleProgressBarChange(carouselData) {
     this.progressBarElScroller.style.width = `${(100 /
@@ -128,10 +146,24 @@ class carouselProgressBar {
   /**
    * Initialize plugin.
    * Create progress bar elements and add carousel event listeners.
+   * @private
    */
   initialize() {
     this.createAndAppendProgressBarEl();
     this.reactToCarouselChanges();
+  }
+
+  /**
+   * Destroy progress bar element and remove event listeners
+   * @public
+   */
+  destroy() {
+    this.$carousel.off(
+      'initialized.owl.carousel resized.owl.carousel translate.owl.carousel',
+      this.handleProgressBarChange
+    );
+    this.$carousel.off('translate.owl.carousel', this.checkForLoopMode);
+    this.progressBarEl.parentNode.removeChild(this.progressBarEl);
   }
 }
 
@@ -144,7 +176,14 @@ class carouselProgressBar {
     const settings = $.extend({}, options);
 
     $.each(carouselElements, function() {
-      new carouselProgressBar(this, settings);
+      // destroy previous progress bar
+      const progressBarAlreadyAttached = this.progressBarLoaded;
+      if (progressBarAlreadyAttached) this.destroyProgressBar();
+
+      // create new progress bar instance
+      const progressBarInstance = new carouselProgressBar(this, settings);
+      this.destroyProgressBar = progressBarInstance.destroy;
+      this.progressBarLoaded = true;
     });
 
     return this;
