@@ -1,6 +1,6 @@
 {
   "name": "owlcarousel2-progressbar",
-  "version": "0.3.0",
+  "version": "1.0.0",
   "description": "Super small and customizable progress bar for OwlCarousel 2",
   "main": "dist/owlcarousel2-progressbar.js",
   "scripts": {
