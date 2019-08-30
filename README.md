@@ -15,7 +15,7 @@ Include jQuery and OwlCarousel 2.
 1. Add `owlcarousel2-progressbar` script after jQuery and OwlCarousel 2.
 
 ```html
-<script src="https://unpkg.com/owlcarousel2-progressbar.js"></script>
+<script src="https://unpkg.com/owlcarousel2-progressbar"></script>
 ```
 
 2. Create progress bar for your carousel/s **(please note that for correct work you should create progress bar before owl carousel instance/s creation)**.
@@ -52,8 +52,8 @@ Custom options:
 
 4. That's it :innocent:.
 
-### Available options
-#
+## Available options
+
 Prop | Value (default) | Description
 ------------ | ------------- | -------------
 `size` (string) | `'2px'` | Progress bar height
@@ -65,15 +65,14 @@ Prop | Value (default) | Description
 `progressBarClassName` (string) | `'owl-carousel-progress-bar'` | CSS class name for progress bar element
 `scrollerClassName` (string) | `'owl-carousel-progress-bar-scroller'` | CSS class name for scroller element
 
-### Demo
+## Demo
+
 You can see progress bar in action in `demo.html` file.
 
-#
-#
 ---
-#
 
-### Development
+## Development
+
 1. Install all npm packages using by running `npm i`.
 2. Run development mode with file watcher by running `npm run dev`.
 3. Create production ready bundle using `npm run build`.
