@@ -1,6 +1,6 @@
 {
   "name": "owlcarousel-progressbar",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "description": "Custom progress bar for Owl Carousel 2",
   "main": "index.js",
   "scripts": {
